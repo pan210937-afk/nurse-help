@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>护士减负助手（通用版｜无登录）</title>
+  <style>
+    :root{--bg:#f6f7fb;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e5e7eb;--chip:#eef2ff;}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text)}
+    header{position:sticky;top:0;background:rgba(246,247,251,.92);backdrop-filter:saturate(180%) blur(10px);
+      border-bottom:1px solid var(--line);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;z-index:10}
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{font-size:26px}
+    .title{font-weight:900}
+    .sub{font-size:12px;color:var(--muted)}
+    .btn{border:none;border-radius:10px;padding:10px 12px;background:#111827;color:#fff;cursor:pointer;font-weight:800}
+    .btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+    main{display:grid;grid-template-columns:1.15fr .85fr;gap:14px;padding:14px;max-width:1200px;margin:0 auto}
+    .panel,.detail{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+    .panel{padding:14px}
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    input,select{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:#fff;font-size:14px}
+    input{flex:1;min-width:240px}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    .chip{background:var(--chip);border:1px solid #dbeafe;border-radius:999px;padding:6px 10px;font-size:12px;cursor:pointer}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+    .card{border:1px solid var(--line);border-radius:14px;padding:12px;cursor:pointer;background:#fff}
+    .card:hover{border-color:#cbd5e1}
+    .cardTitle{font-weight:900}
+    .cardMeta{font-size:12px;color:var(--muted);margin-top:3px}
+    .cardSnippet{font-size:13px;margin-top:8px;line-height:1.35}
+    .badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:3px 8px;font-size:12px;color:var(--muted);margin-top:8px}
+    .detail{padding:14px;position:sticky;top:72px;height:calc(100vh - 92px);overflow:auto}
+    .dHead{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:flex-start}
+    .dTitle{font-size:18px;font-weight:900}
+    .dMeta{font-size:12px;color:var(--muted);margin-top:3px}
+    .dBtns{display:flex;gap:8px;flex-wrap:wrap}
+    .kv{display:grid;grid-template-columns:180px 1fr;gap:10px 12px;margin-top:14px}
+    .k{font-size:12px;color:var(--muted);padding-top:4px}
+    .v{font-size:14px;line-height:1.5;white-space:pre-wrap}
+    .block{margin-top:14px;border-top:1px dashed var(--line);padding-top:14px}
+    .bTitle{font-weight:900;margin-bottom:8px}
+    pre{background:#0b1020;color:#e5e7eb;border-radius:12px;padding:12px;overflow:auto;white-space:pre-wrap;line-height:1.45}
+    .toast{position:fixed;right:18px;bottom:18px;background:#111827;color:#fff;padding:10px 12px;border-radius:10px;display:none}
+    dialog{border:none;border-radius:14px;padding:16px;max-width:560px}
+    @media (max-width:980px){main{grid-template-columns:1fr}.detail{position:relative;top:0;height:auto}.grid{grid-template-columns:1fr}.kv{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo">🩺</div>
+    <div>
+      <div class="title">护士减负助手（通用版｜无登录）</div>
+      <div class="sub">搜索症状/异常 → 点模块 → 一键复制护理记录 / SBAR / 宣教</div>
+    </div>
+  </div>
+  <div class="row">
+    <button class="btn ghost" id="aboutBtn">说明</button>
+  </div>
+</header>
+
+<main>
+  <section class="panel">
+    <div class="row">
+      <input id="q" placeholder="搜索：疼痛 / 发热 / 低钾 / 跌倒 / SBAR …" />
+      <select id="cat"><option value="">全部分类</option></select>
+      <select id="sort">
+        <option value="name">按名称</option>
+        <option value="cat">按分类</option>
+      </select>
+    </div>
+    <div class="chips" id="chips"></div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section class="detail">
+    <div class="dHead">
+      <div>
+        <div class="dTitle" id="dTitle">选择一个模块</div>
+        <div class="dMeta" id="dMeta"></div>
+      </div>
+      <div class="dBtns">
+        <button class="btn" id="copyRecord">复制护理记录</button>
+        <button class="btn" id="copySBAR">复制SBAR</button>
+        <button class="btn" id="copyEdu">复制宣教</button>
+        <button class="btn ghost" id="copyAll">复制全部</button>
+      </div>
+    </div>
+
+    <div class="kv">
+      <div class="k">机制/原因</div><div class="v" id="dMechanism"></div>
+      <div class="k">危险信号</div><div class="v" id="dRed"></div>
+      <div class="k">评估要点（最少字段）</div><div class="v" id="dAssess"></div>
+      <div class="k">护理措施（可执行）</div><div class="v" id="dAction"></div>
+      <div class="k">复评时间</div><div class="v" id="dRe"></div>
+      <div class="k">效果评价</div><div class="v" id="dEval"></div>
+    </div>
+
+    <div class="block">
+      <div class="bTitle">护理记录模板（可复制）</div>
+      <pre id="dRecord"></pre>
+    </div>
+
+    <div class="block">
+      <div class="bTitle">SBAR模板（可复制）</div>
+      <pre id="dSBAR"></pre>
+    </div>
+
+    <div class="block">
+      <div class="bTitle">宣教话术（可复制）</div>
+      <pre id="dEdu"></pre>
+    </div>
+
+    <div class="block">
+      <div class="bTitle">参考依据</div>
+      <div class="v" id="dRefs"></div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+  </section>
+</main>
+
+<dialog id="about">
+  <h3>怎么用（最快）</h3>
+  <ol>
+    <li>在左侧搜索你要的：例如“腹胀”“低钾”“跌倒”。</li>
+    <li>点卡片进入模块，右侧会显示完整推理链与模板。</li>
+    <li>点“复制护理记录/SBAR/宣教”，粘贴到文书里，把“××”替换成真实信息。</li>
+  </ol>
+  <p><strong>隐私：</strong>本页面不联网上传任何病人信息；你复制的内容仅在本机剪贴板里。</p>
+  <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px;">
+    <button class="btn ghost" onclick="document.getElementById('about').close()">关闭</button>
+  </div>
+</dialog>
+
+<script>
+window.MODULES=[{"模块名称": "疼痛（NRS）", "分类": "生命体征/症状", "机制": "组织损伤/炎症、肿瘤压迫或神经受累可引起伤害性或神经病理性疼痛；强度决定升级处理强度。", "危险信号": "NRS≥7；爆发痛；意识改变；呼吸频率<12或明显嗜睡（阿片相关）；血压不稳。", "评估要点": "NRS评分；部位/性质/诱因；生命体征；既往镇痛与给药途径；不良反应观察。", "护理措施": "非药物：舒适体位/安静/放松；药物：按医嘱镇痛并监测呼吸/意识/血压；必要时报告医生调整方案。", "复评时间": "口服60min；静脉15min；肌注/皮下30min（按途径）", "效果评价": "NRS↓≥2分或降至轻度；生命体征稳定；无明显不良反应。", "护理记录模板": "患者诉疼痛NRS×分，部位××性质××；生命体征××。已予舒适体位/环境安静等；报告医生。遵医嘱给××镇痛（途径××）。按途径复评：××后NRS×分，生命体征××，继续观察/按医嘱处理。", "SBAR模板": "S：×床疼痛NRS×分（部位××）。B：既往××，本班镇痛××（途径××）。A：复评NRS×分，生命体征××，需关注××（嗜睡/呼吸慢）。R：请继续按时复评与观察不良反应，必要时报告医生。", "宣教话术": "疼痛不必忍耐，及时告知；用药后如嗜睡明显、呼吸变慢、头晕乏力请立刻呼叫。", "参考依据": "NCCN Adult Cancer Pain（JNCCN PDF，复评时间建议）"}, {"模块名称": "发热/疑似感染（含脓毒症快速识别）", "分类": "生命体征/感染", "机制": "感染最常见；也可见药物热、输血反应、肿瘤热等。护理重点：识别脓毒症/休克风险并快速升级。", "危险信号": "意识改变；尿量明显减少；RR明显增快；收缩压偏低/灌注差；体温<36℃或持续高热；皮肤花斑/发绀。", "评估要点": "T/HR/RR/BP；意识；尿量；寒战/皮疹/伤口/导管情况；免疫低下背景。", "护理措施": "先评估灌注与生命体征；高风险→立即报告医生/启动流程；按医嘱采样（血培养/乳酸等）、补液、抗感染、退热；落实手卫生与隔离。", "复评时间": "高风险：至少每小时结构化复评；退热后观察趋势（按病情）。", "效果评价": "体温下降且趋势稳定；生命体征/灌注/尿量/意识改善；无进一步恶化信号。", "护理记录模板": "患者T××℃，伴/不伴寒战；P××R××BP××/××；意识××尿量××。已评估脓毒症高风险信号并报告医生/启动流程。遵医嘱采样/补液/抗感染/退热等。××后复评T××℃，生命体征××，继续观察。", "SBAR模板": "S：×床发热T××℃，疑似感染。B：基础病××/近期手术或化疗/免疫低下。A：已评估高风险并报告；已按医嘱处理××；复评T××℃。R：继续监测T/生命体征/尿量/意识，出现低血压或意识改变立即升级。", "宣教话术": "发热期间注意休息与补液（遵医嘱）；如寒战加重、气促、意识模糊、尿量减少等立即告知。", "参考依据": "NICE Suspected Sepsis；Surviving Sepsis Campaign"}, {"模块名称": "呼吸困难/低氧", "分类": "生命体征/呼吸", "机制": "通气/换气障碍、气道分泌物、肺部感染、心衰/肺水肿、血栓等可致缺氧。", "危险信号": "SpO2持续<90%或较基线明显下降；RR≥30；紫绀；意识改变；血压不稳；胸痛/咯血。", "评估要点": "SpO2、RR、呼吸功（辅助呼吸肌）、意识；听诊；痰量性状；胸痛；既往肺/心病史。", "护理措施": "协助半坐卧/端坐位；保持气道通畅（吸痰按规范）；按医嘱吸氧/雾化/用药；必要时快速报告医生并准备急救物品。", "复评时间": "处理后5–15min复评SpO2与呼吸功（按病情）。", "效果评价": "SpO2回升并稳定；呼吸困难缓解；生命体征稳定。", "护理记录模板": "患者诉气促，SpO2××%（吸氧××L/min），RR××，意识××。协助半坐卧/保持气道通畅，按医嘱吸氧/雾化/用药。××min复评SpO2××%，症状××，继续观察/报告医生。", "SBAR模板": "S：×床气促SpO2××%。B：××基础病/近期感染/术后。A：已处理体位/气道/吸氧××，复评SpO2××%。R：请继续监测SpO2/RR/意识，必要时升级处理。", "宣教话术": "保持半坐卧位，避免用力；如气促加重、胸痛或唇周发紫立即呼叫。", "参考依据": "常用呼吸急症护理常规；AHA急救基础原则"}, {"模块名称": "低血压/休克倾向（外周灌注）", "分类": "生命体征/循环", "机制": "低血容量、感染性休克、心源性、出血等导致组织灌注不足。", "危险信号": "收缩压<90或MAP<65；意识改变；CRT延长>2s/四肢湿冷；尿量减少；皮肤花斑；乳酸升高（如知）。", "评估要点": "BP/HR/RR/SpO2；意识；尿量；外周灌注（CRT/皮温/肤色）；出血征象。", "护理措施": "平卧抬腿（无禁忌）；建立/维持静脉通路；按医嘱补液/升压/止血等；严密监测并立即报告医生。", "复评时间": "急性期5–15min复评生命体征与灌注（按病情）。", "效果评价": "BP回升/灌注改善（CRT缩短/皮温改善）/尿量增加；意识改善。", "护理记录模板": "BP××/××mmHg，HR××，意识××，尿量××，CRT××s四肢××。已平卧抬腿/保暖，维护静脉通路并报告医生。遵医嘱补液/用药。××min复评BP××/××，灌注××，继续观察。", "SBAR模板": "S：×床低血压BP××/××，灌注差。B：××（出血/感染/脱水）。A：已处理体位/通路/按医嘱补液用药，复评BP××/××。R：请继续严密监测生命体征、尿量与灌注，必要时升级救治。", "宣教话术": "变换体位动作要慢；头晕乏力或胸闷立即告知；按医嘱补液/进食。", "参考依据": "Surviving Sepsis Campaign（灌注与复评原则）；基础休克护理常规"}, {"模块名称": "高血压/头痛头晕（含危险头痛识别）", "分类": "生命体征/神经", "机制": "血压升高、药物/应激、颅内病变等可致头痛头晕；需排除卒中/高危。", "危险信号": "剧烈“雷击样”头痛；神经缺损（口角歪/肢体无力/言语不清）；意识改变；BP≥180/120伴症状；胸痛气促。", "评估要点": "BP复测；头痛性质/持续时间；神经系统简筛；既往高血压史；用药依从。", "护理措施": "协助卧床休息、环境安静；复测BP并记录；出现危险信号立即报告医生；按医嘱用药与观察。", "复评时间": "处理后15–30min复测BP与症状（按医嘱）。", "效果评价": "BP下降至目标范围或下降趋势；症状缓解；无神经缺损进展。", "护理记录模板": "患者诉头痛/头晕××，BP××/××复测××/××；神经系统简筛××。协助卧床休息、安静环境，报告医生。遵医嘱用药。××min复评BP××/××，症状××。", "SBAR模板": "S：×床头痛头晕，BP××/××。B：高血压史××/用药××。A：已休息/复测BP/按医嘱用药，复评BP××/××。R：请继续监测BP与神经症状，出现危险信号立即升级。", "宣教话术": "按医嘱规律用药；避免情绪激动；若出现言语不清、肢体无力、剧烈头痛请立即求助。", "参考依据": "卒中/高血压急症临床共识要点（通用护理常规）"}, {"模块名称": "意识改变（谵妄/嗜睡）", "分类": "神经/安全", "机制": "感染、低氧、低血糖、电解质紊乱、药物（镇痛镇静）、肝肾功能异常等可致意识改变。", "危险信号": "突然意识下降；抽搐；呼吸抑制；SpO2低；低血糖；瞳孔异常。", "评估要点": "意识水平（AVPU/简评）；生命体征；SpO2；血糖（如可）；用药史；疼痛/尿潴留/便秘等诱因。", "护理措施": "确保安全（床栏/陪护/防跌倒）；评估可逆原因并立即报告医生；按医嘱处理（氧疗/补糖/调整药物等）。", "复评时间": "处理后15–60min复评意识与生命体征（按病情）。", "效果评价": "意识改善/稳定；生命体征稳定；无跌倒/误吸等事件。", "护理记录模板": "患者意识××（清醒/嗜睡/烦躁），生命体征××，SpO2××%。已加强防护（床栏/陪护），评估诱因（用药/低氧/低血糖等）并报告医生。遵医嘱处理。复评意识××。", "SBAR模板": "S：×床意识改变××。B：××基础病/用药××。A：已采取安全措施并报告，按医嘱××处理，复评意识××。R：请继续监测意识、SpO2与生命体征，必要时升级。", "宣教话术": "家属陪护；如出现突然嗜睡、胡言乱语、抽搐或跌倒风险请及时告知。", "参考依据": "住院谵妄/意识障碍护理常规"}, {"模块名称": "跌倒风险与宣教", "分类": "安全/基础护理", "机制": "乏力、镇静镇痛、低血压/头晕、环境因素等增加跌倒风险。", "危险信号": "近期跌倒史；明显头晕/步态不稳；夜间频繁起床；服用镇静/阿片。", "评估要点": "跌倒风险评估（简化）；步态/肌力；用药；血压体位变化；环境。", "护理措施": "床旁呼叫器可及；夜间照明；协助如厕；防滑鞋；必要时陪护；宣教。", "复评时间": "每班复评风险变化；用药/病情变化后及时复评。", "效果评价": "无跌倒事件；患者/家属掌握要点；环境风险降低。", "护理记录模板": "评估患者跌倒风险××（高/中/低），相关因素××。已落实防跌倒措施（呼叫器/防滑/陪护/协助活动），并完成宣教。继续观察。", "SBAR模板": "S：×床跌倒高危。B：因素：乏力/头晕/镇痛药等。A：已落实防跌倒措施并宣教。R：请继续协助起床如厕与巡视。", "宣教话术": "起床先坐起1–2分钟；穿防滑鞋；需下床先呼叫；夜间不要摸黑走动。", "参考依据": "AHRQ Fall TIPS 工具包（防跌倒）"}, {"模块名称": "压疮/压力性损伤风险", "分类": "基础护理/皮肤", "机制": "压力、剪切力、潮湿、营养不良导致皮肤与软组织损伤。", "危险信号": "活动受限；骨突处红肿不退；失禁潮湿；营养差。", "评估要点": "皮肤评估（骨突处/潮湿）；Braden等风险评估（可简化）；营养与活动能力。", "护理措施": "翻身减压；保持皮肤清洁干燥；气垫/敷料按医嘱；营养支持宣教；记录皮肤变化。", "复评时间": "每班巡视皮肤；高危患者至少每2小时翻身（按制度）。", "效果评价": "皮肤完整；红肿减轻；无新发压力损伤。", "护理记录模板": "评估压疮风险××，皮肤××。已落实翻身减压/皮肤清洁干燥/减压垫等措施。复评皮肤××，继续观察。", "SBAR模板": "S：×床压疮高危/皮肤红肿××。B：活动受限/失禁/营养差。A：已减压护理并记录皮肤。R：继续按翻身计划执行并观察。", "宣教话术": "保持皮肤干燥；避免长时间压迫同一部位；家属协助翻身与皮肤观察。", "参考依据": "NPIAP/EPUAP 压力性损伤预防原则（护理常规）"}, {"模块名称": "恶心呕吐（通用/含误吸预防）", "分类": "消化系统", "机制": "胃肠道刺激、药物、化疗、感染、电解质紊乱等可致恶心呕吐；关注脱水与误吸。", "危险信号": "呕吐物带血/咖啡渣；意识不清误吸风险；持续剧烈呕吐；明显脱水；剧烈腹痛腹胀。", "评估要点": "次数/性状/诱因；与进食体位关系；尿量/口渴；腹痛腹胀；电解质线索。", "护理措施": "侧卧头偏一侧、抬高床头、清理口腔；少量多餐避免刺激；按医嘱止吐；观察脱水/电解质。", "复评时间": "止吐后30–60min复评症状与摄入尿量（按病情）。", "效果评价": "呕吐次数减少；可耐受进食；尿量改善；无误吸。", "护理记录模板": "患者诉恶心/呕吐×次，性状××；生命体征××。已侧卧位/抬高床头/清理口腔防误吸；指导少量多餐避免刺激。遵医嘱止吐。××后复评症状××，继续观察/报告医生。", "SBAR模板": "S：×床恶心呕吐×次。B：背景××（药物/化疗/术后）。A：已防误吸并按医嘱止吐，复评××。R：请继续观察次数、脱水与电解质表现。", "宣教话术": "少量多餐；避免油腻辛辣；如持续呕吐无法进食或出现头晕乏力/意识异常立即告知。", "参考依据": "ONS CINV循证框架；通用呕吐护理常规"}, {"模块名称": "腹胀/便秘", "分类": "消化系统", "机制": "肠蠕动减弱、药物（阿片）、活动少、摄入不足等可致腹胀便秘；需排除肠梗阻。", "危险信号": "持续剧烈腹痛/呕吐；停止排气排便；腹部明显膨隆/反跳痛；肠鸣音异常明显。", "评估要点": "腹胀程度；排气排便；进食饮水；腹痛；肠鸣音；用药史（阿片）。", "护理措施": "饮食：易消化/适量纤维（按病情）；活动：下床走动；腹部顺时针按摩；按医嘱通便/灌肠；警惕梗阻及时报告。", "复评时间": "干预后4–8h评估排气排便与腹痛（按病情/医嘱）。", "效果评价": "腹胀减轻；排便/排气恢复；腹痛缓解。", "护理记录模板": "【按结构】症状/评估→措施→复评→评价（复制后补××）", "SBAR模板": "S：… B：… A：… R：…（按本模块要点补××）", "宣教话术": "按本模块要点宣教（可复制后少量改动）", "参考依据": "便秘护理常规/ERAS相关建议"}, {"模块名称": "腹泻", "分类": "消化系统", "机制": "感染、药物、肠道疾病/治疗可致腹泻；风险：脱水、电解质紊乱、皮肤破损。", "危险信号": "频繁水样便伴乏力头晕；血便；发热；尿量明显减少。", "评估要点": "次数/性状；腹痛；发热；尿量；皮肤情况；近期抗生素/泻药史。", "护理措施": "补液（遵医嘱）；清淡饮食；会阴皮肤保护；按医嘱止泻/查检；监测电解质与生命体征，必要时隔离。", "复评时间": "2–4h评估症状与尿量（按病情）。", "效果评价": "腹泻次数减少；尿量改善；皮肤完整。", "护理记录模板": "【按结构】症状/评估→措施→复评→评价（复制后补××）", "SBAR模板": "S：… B：… A：… R：…（按本模块要点补××）", "宣教话术": "按本模块要点宣教（可复制后少量改动）", "参考依据": "腹泻/感染控制护理常规"}, {"模块名称": "乏力/活动耐量下降", "分类": "神经/功能", "机制": "贫血、感染、营养不良、治疗副作用等导致乏力；风险：跌倒、压伤。", "危险信号": "突然不能站立/意识改变；胸痛气促；黑便/出血征象。", "评估要点": "肌力；生命体征；Hb（如知）；营养摄入；睡眠；跌倒风险。", "护理措施": "分级活动计划；防跌倒措施；能量保存技巧；营养/睡眠指导；必要时报告医生评估贫血等原因。", "复评时间": "每日/每班复评活动耐量。", "效果评价": "活动能力提升或稳定；无跌倒。", "护理记录模板": "【按结构】症状/评估→措施→复评→评价（复制后补××）", "SBAR模板": "S：… B：… A：… R：…（按本模块要点补××）", "宣教话术": "按本模块要点宣教（可复制后少量改动）", "参考依据": "癌因性疲乏/住院乏力护理常规"}, {"模块名称": "水肿/液体潴留", "分类": "循环/体液", "机制": "低蛋白、心肾功能异常、静脉回流障碍、药物等导致水肿。", "危险信号": "突发气促/端坐呼吸；体重短期快速增加；少尿；皮肤破溃。", "评估要点": "水肿部位/程度；体重；出入量；尿量；呼吸情况；皮肤完整性。", "护理措施": "抬高患肢；皮肤护理；按医嘱利尿/限盐限水；监测体重与出入量；出现呼吸困难及时报告。", "复评时间": "每日体重/每班评估水肿（按病情）。", "效果评价": "水肿减轻；皮肤完整；呼吸平稳。", "护理记录模板": "【按结构】症状/评估→措施→复评→评价（复制后补××）", "SBAR模板": "S：… B：… A：… R：…（按本模块要点补××）", "宣教话术": "按本模块要点宣教（可复制后少量改动）", "参考依据": "心衰/肾病/低蛋白水肿护理常规"}, {"模块名称": "出血倾向/血小板低", "分类": "实验室/安全", "机制": "血小板减少或凝血异常导致出血风险增加。", "危险信号": "活动性出血；黑便/血尿；颅内出血警示（剧烈头痛/呕吐/意识改变）。", "评估要点": "皮肤黏膜出血点；牙龈鼻出血；大便/尿液颜色；生命体征；用药（抗凝）。", "护理措施": "避免肌注/硬刷牙；软毛牙刷；防碰撞；压迫止血；按医嘱输注血小板/止血；出血立即报告。", "复评时间": "处理后30–60min复评出血情况（按病情）。", "效果评价": "无新发出血；出血停止；生命体征稳定。", "护理记录模板": "【按结构】症状/评估→措施→复评→评价（复制后补××）", "SBAR模板": "S：… B：… A：… R：…（按本模块要点补××）", "宣教话术": "按本模块要点宣教（可复制后少量改动）", "参考依据": "出血风险护理常规"}, {"模块名称": "白细胞低/中性粒低（感染防护）", "分类": "实验室/感染", "机制": "中性粒细胞减少降低抗感染能力，轻微感染可迅速进展。", "危险信号": "发热；寒战；咽痛咳嗽；导管红肿渗液；血压下降/意识改变。", "评估要点": "体温；口腔/皮肤/导管入口；咳痰；尿路症状；WBC/ANC（如知）。", "护理措施": "手卫生；口腔护理；避免人群/生食；监测体温；发热立即报告并按医嘱采样/抗感染；必要时保护性隔离。", "复评时间": "至少每班监测体温；出现症状随时复评。", "效果评价": "无感染发生或及时控制；体温平稳。", "护理记录模板": "【按结构】症状/评估→措施→复评→评价（复制后补××）", "SBAR模板": "S：… B：… A：… R：…（按本模块要点补××）", "宣教话术": "按本模块要点宣教（可复制后少量改动）", "参考依据": "CDC Neutropenia & infection prevention；通用感染防控原则"}, {"模块名称": "低钠", "分类": "实验室/电解质", "机制": "摄入不足、稀释性低钠（SIADH/过量补液）、药物等致低钠；重者可致脑水肿。", "危险信号": "意识改变/抽搐；严重乏力；呕吐；呼吸异常。", "评估要点": "神志；恶心呕吐；肌力；出入量；用药；血钠数值（如知）。", "护理措施": "限制自由饮水（遵医嘱）；按医嘱补钠；监测神志与生命体征；警惕快速纠正风险（由医生决策）。", "复评时间": "按医嘱复查电解质；每班评估神志。", "效果评价": "症状缓解；神志清；电解质改善趋势。", "护理记录模板": "【按结构】症状/评估→措施→复评→评价（复制后补××）", "SBAR模板": "S：… B：… A：… R：…（按本模块要点补××）", "宣教话术": "按本模块要点宣教（可复制后少量改动）", "参考依据": "Mayo Clinic Hyponatremia；电解质紊乱护理常规"}, {"模块名称": "低钾", "分类": "实验室/电解质", "机制": "摄入不足、呕吐腹泻、利尿剂等致低钾；可致肌无力与心律失常。", "危险信号": "心悸/心律失常；明显肌无力；麻痹；ECG异常（如知）。", "评估要点": "心率节律；肌力；呕吐腹泻；用药（利尿剂）；电解质数值（如知）。", "护理措施": "按医嘱补钾；必要时心电监测；观察静脉补钾刺激/渗漏；评估持续丢钾原因。", "复评时间": "补钾后按医嘱复查；症状变化随时复评。", "效果评价": "心律稳定；肌力改善；钾回升趋势。", "护理记录模板": "【按结构】症状/评估→措施→复评→评价（复制后补××）", "SBAR模板": "S：… B：… A：… R：…（按本模块要点补××）", "宣教话术": "按本模块要点宣教（可复制后少量改动）", "参考依据": "Merck Manual Hypokalemia；电解质护理常规"}, {"模块名称": "低钙/低镁", "分类": "实验室/电解质", "机制": "营养不足、肠吸收差、某些药物等可致低钙/低镁；可致肌痉挛与心律问题。", "危险信号": "手足搐搦/抽搐；心律失常；喉痉挛。", "评估要点": "麻木/肌痉挛；心率节律；相关用药；电解质数值（如知）。", "护理措施": "按医嘱补钙/补镁；观察静脉补充反应；必要时心电监测；宣教饮食来源。", "复评时间": "按医嘱复查电解质；症状变化随时复评。", "效果评价": "痉挛缓解；心律稳定；电解质改善。", "护理记录模板": "【按结构】症状/评估→措施→复评→评价（复制后补××）", "SBAR模板": "S：… B：… A：… R：…（按本模块要点补××）", "宣教话术": "按本模块要点宣教（可复制后少量改动）", "参考依据": "电解质紊乱护理常规"}, {"模块名称": "高钾", "分类": "实验室/电解质", "机制": "肾功能不全、溶血、药物等导致高钾；可致致命性心律失常。", "危险信号": "心悸/胸闷；心律失常；肌无力；ECG异常。", "评估要点": "心率节律；肾功能背景；用药；钾数值（如知）。", "护理措施": "立即报告医生；按医嘱处理（钙剂/胰岛素-葡萄糖/透析等由医生）；心电监测；避免含钾补液/食物（遵医嘱）。", "复评时间": "急性期持续心电与生命体征监测。", "效果评价": "心律稳定；钾下降趋势；症状缓解。", "护理记录模板": "【按结构】症状/评估→措施→复评→评价（复制后补××）", "SBAR模板": "S：… B：… A：… R：…（按本模块要点补××）", "宣教话术": "按本模块要点宣教（可复制后少量改动）", "参考依据": "高钾血症急救原则（通用内科常规）"}, {"模块名称": "低血糖/高血糖", "分类": "代谢", "机制": "胰岛素/口服降糖药、进食不足或应激/感染可致血糖异常；低血糖危急。", "危险信号": "低血糖：出汗/意识改变/抽搐；高血糖：意识模糊/呼吸深快/脱水。", "评估要点": "血糖值（如可）；意识；进食；用药；尿量与口渴。", "护理措施": "低血糖：立即补糖并报告；高血糖：按医嘱处理/补液/监测；记录并复评。", "复评时间": "低血糖15min复测；高血糖按医嘱复测。", "效果评价": "血糖回归目标；症状缓解。", "护理记录模板": "【按结构】症状/评估→措施→复评→评价（复制后补××）", "SBAR模板": "S：… B：… A：… R：…（按本模块要点补××）", "宣教话术": "按本模块要点宣教（可复制后少量改动）", "参考依据": "糖代谢异常护理常规"}, {"模块名称": "静脉通路护理（PIVC/PICC/PORT）", "分类": "基础护理/静脉治疗", "机制": "导管相关感染、堵管、渗漏/外渗可导致局部损伤与严重并发症。", "危险信号": "渗漏肿胀疼痛；回抽无回血；发热寒战；穿刺点红肿热痛渗液。", "评估要点": "穿刺点皮肤；回血/通畅性；输液速度；疼痛肿胀；体温。", "护理措施": "严格无菌操作；固定与维护；渗漏/疑外渗立即停止并按制度处理；感染征象立即报告；按医嘱冲封管。", "复评时间": "每班巡视通路；输注刺激性药物更频繁巡视。", "效果评价": "通路通畅无并发症；皮肤完整。", "护理记录模板": "【按结构】症状/评估→措施→复评→评价（复制后补××）", "SBAR模板": "S：… B：… A：… R：…（按本模块要点补××）", "宣教话术": "按本模块要点宣教（可复制后少量改动）", "参考依据": "INS 静脉治疗相关原则；医院静疗制度"}, {"模块名称": "渗漏/外渗（含刺激性药物）", "分类": "基础护理/静脉治疗", "机制": "药液进入组织间隙导致组织损伤；刺激性/腐蚀性药物风险更高。", "危险信号": "疼痛明显；皮肤苍白/紫绀/水疱；进行性肿胀；感觉异常。", "评估要点": "局部疼痛/肿胀/皮肤颜色温度；输液部位；药物性质。", "护理措施": "立即停止输注，保留针/按制度回抽；抬高患肢；按药物性质冷/热敷；报告医生并按制度用解毒剂（如适用）；记录面积与照片（如允许）。", "复评时间": "初期15–30min复评局部变化，随后每班复评。", "效果评价": "损伤不进展；疼痛减轻；皮肤完整。", "护理记录模板": "【按结构】症状/评估→措施→复评→评价（复制后补××）", "SBAR模板": "S：… B：… A：… R：…（按本模块要点补××）", "宣教话术": "按本模块要点宣教（可复制后少量改动）", "参考依据": "INS外渗处理原则；科室制度"}, {"模块名称": "术前准备（通用）", "分类": "围手术期", "机制": "降低手术并发症与感染风险，提升术后恢复。", "危险信号": "未禁食/未停用禁忌药；严重焦虑；皮肤破损/感染灶。", "评估要点": "手术/麻醉史；过敏史；禁食禁饮执行；皮肤与口腔；心理状态。", "护理措施": "宣教（流程/禁食/术后活动）；皮肤准备；核对资料；按医嘱备血/备皮/给药；心理支持。", "复评时间": "术前关键节点复核（入室前）。", "效果评价": "准备齐全；患者理解到位。", "护理记录模板": "【按结构】症状/评估→措施→复评→评价（复制后补××）", "SBAR模板": "S：… B：… A：… R：…（按本模块要点补××）", "宣教话术": "按本模块要点宣教（可复制后少量改动）", "参考依据": "围手术期护理常规/ERAS原则"}, {"模块名称": "术后观察（通用）", "分类": "围手术期", "机制": "术后早期风险：出血、呼吸循环不稳、疼痛、感染、DVT等。", "危险信号": "活动性出血；呼吸困难；意识异常；引流量突然增多/鲜红；低血压。", "评估要点": "生命体征；切口敷料；引流量性状；疼痛NRS；尿量；恶心呕吐。", "护理措施": "按频次监测生命体征；观察伤口/引流；镇痛与防误吸；早期活动与呼吸训练（遵医嘱）；防DVT措施。", "复评时间": "术后最初数小时按制度密切复评；稳定后每班复评。", "效果评价": "生命体征稳定；引流在预期；疼痛可控。", "护理记录模板": "【按结构】症状/评估→措施→复评→评价（复制后补××）", "SBAR模板": "S：… B：… A：… R：…（按本模块要点补××）", "宣教话术": "按本模块要点宣教（可复制后少量改动）", "参考依据": "围手术期护理常规/ERAS"}, {"模块名称": "DVT/血栓风险（含D二聚体升高提示）", "分类": "循环/安全", "机制": "肿瘤/术后/卧床可致静脉血栓；D二聚体升高提示凝血活化但非特异。", "危险信号": "突发呼吸困难/胸痛；单侧下肢肿痛发热；咯血；SpO2下降。", "评估要点": "下肢肿胀疼痛；活动水平；既往血栓；呼吸症状；医嘱抗凝。", "护理措施": "鼓励早期活动（遵医嘱）；下肢泵/弹力袜（如开立）；避免下肢按摩；出现疑似PE/DVT立即报告医生。", "复评时间": "每日评估肢体与呼吸症状。", "效果评价": "无血栓事件；风险降低；早期活动达成。", "护理记录模板": "【按结构】症状/评估→措施→复评→评价（复制后补××）", "SBAR模板": "S：… B：… A：… R：…（按本模块要点补××）", "宣教话术": "按本模块要点宣教（可复制后少量改动）", "参考依据": "血栓预防护理常规/指南要点"}, {"模块名称": "出入量/液体超负荷", "分类": "循环/体液", "机制": "补液过量、心肾功能不全可致液体超负荷与肺水肿。", "危险信号": "气促/端坐呼吸；湿啰音；SpO2下降；体重快速上升；少尿。", "评估要点": "体重；出入量；尿量；呼吸音与SpO2；水肿。", "护理措施": "严格记录出入量；按医嘱限液/利尿；抬高床头；必要时吸氧；及时报告医生。", "复评时间": "每班核对出入量；症状变化随时复评。", "效果评价": "呼吸改善；出入量平衡；体重稳定。", "护理记录模板": "【按结构】症状/评估→措施→复评→评价（复制后补××）", "SBAR模板": "S：… B：… A：… R：…（按本模块要点补××）", "宣教话术": "按本模块要点宣教（可复制后少量改动）", "参考依据": "心衰/液体管理护理常规"}, {"模块名称": "皮肤破损/伤口护理（非手术）", "分类": "基础护理/皮肤", "机制": "摩擦、潮湿、感染等致皮肤破损；需预防感染与进一步损伤。", "危险信号": "红肿热痛渗液；扩散；发热。", "评估要点": "伤口大小/渗液/气味；周围皮肤；疼痛；体温。", "护理措施": "清洁与无菌换药（按制度）；保持干燥；减压；按医嘱抗感染；记录变化。", "复评时间": "换药后复评渗液/疼痛；每班观察。", "效果评价": "伤口好转；无感染扩散。", "护理记录模板": "【按结构】症状/评估→措施→复评→评价（复制后补××）", "SBAR模板": "S：… B：… A：… R：…（按本模块要点补××）", "宣教话术": "按本模块要点宣教（可复制后少量改动）", "参考依据": "伤口护理常规"}, {"模块名称": "睡眠障碍/焦虑", "分类": "心理/舒适", "机制": "疼痛、环境噪音、焦虑、药物等影响睡眠；睡眠差加重疲乏与疼痛敏感。", "危险信号": "严重焦虑伴呼吸困难/胸痛；谵妄风险。", "评估要点": "睡眠时长质量；疼痛；情绪；咖啡因/午睡；环境因素。", "护理措施": "环境安静/光线调整；睡前放松；疼痛控制；按医嘱助眠；心理支持。", "复评时间": "次日评估睡眠与日间功能。", "效果评价": "睡眠改善；焦虑减轻。", "护理记录模板": "【按结构】症状/评估→措施→复评→评价（复制后补××）", "SBAR模板": "S：… B：… A：… R：…（按本模块要点补××）", "宣教话术": "按本模块要点宣教（可复制后少量改动）", "参考依据": "住院患者睡眠管理建议"}, {"模块名称": "心率过快/心悸", "分类": "通用补充", "机制": "常见住院场景补充模块（后续可补全循证细节）。", "危险信号": "出现急性恶化信号立即升级。", "评估要点": "按症状最少字段评估。", "护理措施": "按制度处理并报告医生。", "复评时间": "按病情复评。", "效果评价": "症状缓解/生命体征稳定。", "护理记录模板": "【按结构】症状/评估→措施→复评→评价（复制后补××）", "SBAR模板": "S：… B：… A：… R：…（按本模块要点补××）", "宣教话术": "按本模块要点宣教（可复制后少量改动）", "参考依据": "通用护理常规"}, {"模块名称": "心率过慢", "分类": "通用补充", "机制": "常见住院场景补充模块（后续可补全循证细节）。", "危险信号": "出现急性恶化信号立即升级。", "评估要点": "按症状最少字段评估。", "护理措施": "按制度处理并报告医生。", "复评时间": "按病情复评。", "效果评价": "症状缓解/生命体征稳定。", "护理记录模板": "【按结构】症状/评估→措施→复评→评价（复制后补××）", "SBAR模板": "S：… B：… A：… R：…（按本模块要点补××）", "宣教话术": "按本模块要点宣教（可复制后少量改动）", "参考依据": "通用护理常规"}];
+</script>
+
+<script>
+const DATA = window.MODULES || [];
+let current = null;
+
+const el = (id)=>document.getElementById(id);
+const toast = (msg)=>{
+  const t = el('toast');
+  t.textContent = msg;
+  t.style.display='block';
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(()=>t.style.display='none', 1600);
+};
+const norm = (s)=>(s||'').toString().trim().toLowerCase();
+const getField = (r, k)=> r[k] ?? r[k.replace(/\s+/g,'')] ?? '';
+const esc = (s)=>(s??'').toString().replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+
+function buildCats(){
+  const cats = Array.from(new Set(DATA.map(r=>getField(r,'分类')).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'zh'));
+  const sel = el('cat');
+  cats.forEach(c=>{
+    const o = document.createElement('option');
+    o.value=c; o.textContent=c; sel.appendChild(o);
+  });
+  const chips = el('chips');
+  cats.slice(0,10).forEach(c=>{
+    const b = document.createElement('button');
+    b.className='chip'; b.textContent=c;
+    b.onclick=()=>{sel.value=c; render();};
+    chips.appendChild(b);
+  });
+}
+
+function matchRow(r,q,cat){
+  const fields = ['模块名称','分类','机制','危险信号','评估要点','护理措施','复评时间','效果评价','护理记录模板','SBAR模板','宣教话术','参考依据'];
+  const hay = fields.map(f=>getField(r,f)).join(' ');
+  return (!q || norm(hay).includes(norm(q))) && (!cat || getField(r,'分类')===cat);
+}
+
+function render(){
+  const q = el('q').value;
+  const cat = el('cat').value;
+  const sort = el('sort').value;
+  let rows = DATA.filter(r=>matchRow(r,q,cat));
+  const key = sort==='cat' ? '分类' : '模块名称';
+  rows.sort((a,b)=> norm(getField(a,key)).localeCompare(norm(getField(b,key)), 'zh'));
+
+  const grid = el('grid');
+  grid.innerHTML='';
+  rows.forEach(r=>{
+    const div = document.createElement('div');
+    div.className='card';
+    const name=getField(r,'模块名称');
+    const meta=getField(r,'分类');
+    const snippet=(getField(r,'危险信号')||getField(r,'评估要点')||'').toString();
+    div.innerHTML = `
+      <div class="cardTitle">${esc(name)}</div>
+      <div class="cardMeta">${esc(meta)}</div>
+      <div class="cardSnippet">${esc(snippet).slice(0,160)}${snippet.length>160?'…':''}</div>
+      <div class="badge">点击查看/复制</div>
+    `;
+    div.onclick=()=>select(r);
+    grid.appendChild(div);
+  });
+  if(rows.length && !current) select(rows[0]);
+  if(!rows.length) clearDetail();
+}
+
+function select(r){
+  current=r;
+  el('dTitle').textContent=getField(r,'模块名称');
+  el('dMeta').textContent=getField(r,'分类');
+  el('dMechanism').textContent=getField(r,'机制');
+  el('dRed').textContent=getField(r,'危险信号');
+  el('dAssess').textContent=getField(r,'评估要点');
+  el('dAction').textContent=getField(r,'护理措施');
+  el('dRe').textContent=getField(r,'复评时间');
+  el('dEval').textContent=getField(r,'效果评价');
+  el('dRecord').textContent=getField(r,'护理记录模板');
+  el('dSBAR').textContent=getField(r,'SBAR模板');
+  el('dEdu').textContent=getField(r,'宣教话术');
+  el('dRefs').textContent=getField(r,'参考依据');
+}
+
+function clearDetail(){
+  el('dTitle').textContent='没有匹配结果';
+  el('dMeta').textContent='';
+  ['dMechanism','dRed','dAssess','dAction','dRe','dEval','dRecord','dSBAR','dEdu','dRefs'].forEach(id=>el(id).textContent='');
+}
+
+async function copyText(txt){
+  try{
+    await navigator.clipboard.writeText(txt);
+    toast('已复制 ✅');
+  }catch(e){
+    const ta=document.createElement('textarea');
+    ta.value=txt; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy'); ta.remove();
+    toast('已复制 ✅');
+  }
+}
+
+el('copyRecord').onclick=()=>current && copyText(getField(current,'护理记录模板'));
+el('copySBAR').onclick=()=>current && copyText(getField(current,'SBAR模板'));
+el('copyEdu').onclick=()=>current && copyText(getField(current,'宣教话术'));
+el('copyAll').onclick=()=>{
+  if(!current) return;
+  const all = [
+    `【模块】${getField(current,'模块名称')}（${getField(current,'分类')}）`,
+    `\n【机制/原因】\n${getField(current,'机制')}`,
+    `\n【危险信号】\n${getField(current,'危险信号')}`,
+    `\n【评估要点】\n${getField(current,'评估要点')}`,
+    `\n【护理措施】\n${getField(current,'护理措施')}`,
+    `\n【复评时间】\n${getField(current,'复评时间')}`,
+    `\n【效果评价】\n${getField(current,'效果评价')}`,
+    `\n【护理记录模板】\n${getField(current,'护理记录模板')}`,
+    `\n【SBAR模板】\n${getField(current,'SBAR模板')}`,
+    `\n【宣教话术】\n${getField(current,'宣教话术')}`,
+    `\n【参考依据】\n${getField(current,'参考依据')}`,
+  ].join('\n');
+  copyText(all);
+};
+
+el('aboutBtn').onclick=()=>el('about').showModal();
+el('q').addEventListener('input', render);
+el('cat').addEventListener('change', render);
+el('sort').addEventListener('change', render);
+
+buildCats();
+render();
+</script>
+</body>
+</html>
