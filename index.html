@@ -3,23 +3,27 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>护士减负助手（通用版｜无登录｜v2）</title>
+  <title>护士减负助手（通用｜无登录）v3.3（全量+临床结构）</title>
   <style>
     :root{--bg:#f6f7fb;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e5e7eb;--chip:#eef2ff;}
     *{box-sizing:border-box}
     body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text)}
-    header{position:sticky;top:0;background:rgba(246,247,251,.92);backdrop-filter:saturate(180%) blur(10px);
-      border-bottom:1px solid var(--line);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;z-index:10}
-    .brand{display:flex;align-items:center;gap:12px}
-    .logo{font-size:26px}
+    header{position:sticky;top:0;background:rgba(246,247,251,.94);backdrop-filter:saturate(180%) blur(10px);
+      border-bottom:1px solid var(--line);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;z-index:10}
+    .brand{display:flex;align-items:center;gap:10px}
+    .logo{font-size:22px}
     .title{font-weight:900}
     .sub{font-size:12px;color:var(--muted)}
-    .btn{border:none;border-radius:10px;padding:10px 12px;background:#111827;color:#fff;cursor:pointer;font-weight:800}
+    .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .btn{border:none;border-radius:10px;padding:9px 12px;background:#111827;color:#fff;cursor:pointer;font-weight:800}
     .btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
-    main{display:grid;grid-template-columns:1.15fr .85fr;gap:14px;padding:14px;max-width:1200px;margin:0 auto}
+    .btn.small{padding:6px 9px;border-radius:10px;font-size:12px}
+    .seg{display:inline-flex;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}
+    .seg button{border:none;background:transparent;padding:8px 10px;cursor:pointer;font-weight:800;color:var(--muted)}
+    .seg button.active{background:#111827;color:#fff}
+    main{display:grid;grid-template-columns:1.15fr .85fr;gap:14px;padding:14px;max-width:1240px;margin:0 auto}
     .panel,.detail{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
     .panel{padding:14px}
-    .row{display:flex;gap:10px;flex-wrap:wrap}
     input,select{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:#fff;font-size:14px}
     input{flex:1;min-width:240px}
     .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
@@ -31,20 +35,35 @@
     .cardMeta{font-size:12px;color:var(--muted);margin-top:3px}
     .cardSnippet{font-size:13px;margin-top:8px;line-height:1.35;white-space:pre-wrap}
     .badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:3px 8px;font-size:12px;color:var(--muted);margin-top:8px}
-    .detail{padding:14px;position:sticky;top:72px;height:calc(100vh - 92px);overflow:auto}
+
+    .detail{padding:14px;position:sticky;top:70px;height:calc(100vh - 88px);overflow:auto}
     .dHead{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:flex-start}
     .dTitle{font-size:18px;font-weight:900}
     .dMeta{font-size:12px;color:var(--muted);margin-top:3px}
     .dBtns{display:flex;gap:8px;flex-wrap:wrap}
+
     .kv{display:grid;grid-template-columns:180px 1fr;gap:10px 12px;margin-top:14px}
     .k{font-size:12px;color:var(--muted);padding-top:4px}
     .v{font-size:14px;line-height:1.5;white-space:pre-wrap}
+    .vbox{position:relative;padding-right:88px}
+    .copyMini{position:absolute;right:0;top:0;display:flex;gap:8px}
+
     .block{margin-top:14px;border-top:1px dashed var(--line);padding-top:14px}
-    .bTitle{font-weight:900;margin-bottom:8px}
+    .bHead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+    .bTitle{font-weight:900;margin-bottom:0}
     pre{background:#0b1020;color:#e5e7eb;border-radius:12px;padding:12px;overflow:auto;white-space:pre-wrap;line-height:1.45}
     .toast{position:fixed;right:18px;bottom:18px;background:#111827;color:#fff;padding:10px 12px;border-radius:10px;display:none}
-    dialog{border:none;border-radius:14px;padding:16px;max-width:560px}
-    @media (max-width:980px){main{grid-template-columns:1fr}.detail{position:relative;top:0;height:auto}.grid{grid-template-columns:1fr}.kv{grid-template-columns:1fr}}
+    dialog{border:none;border-radius:14px;padding:16px;max-width:640px}
+    .hint{font-size:12px;color:var(--muted);margin-top:6px}
+
+    /* clinical structure blocks */
+    .flow{display:grid;gap:10px;margin-top:14px}
+    .flowItem{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff}
+    .flowHead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+    .flowTitle{font-weight:900}
+    .flowBody{margin-top:8px;white-space:pre-wrap;line-height:1.45}
+
+    @media (max-width:980px){main{grid-template-columns:1fr}.detail{position:relative;top:0;height:auto}.grid{grid-template-columns:1fr}.kv{grid-template-columns:1fr}.vbox{padding-right:0}.copyMini{position:relative;right:auto;top:auto;margin-top:6px}}
   </style>
 </head>
 <body>
@@ -52,11 +71,15 @@
   <div class="brand">
     <div class="logo">🩺</div>
     <div>
-      <div class="title">护士减负助手（通用版｜无登录｜v2 模板补全）</div>
-      <div class="sub">搜索症状/异常 → 点模块 → 一键复制护理记录 / SBAR / 宣教（不用填表、不增加点击负担）</div>
+      <div class="title">护士减负助手（通用｜无登录）v3.3</div>
+      <div class="sub">全量模块不丢失 ✅ ；新增「临床结构版」分段复制 ✅（主诉/评估/措施/复评/评价）</div>
     </div>
   </div>
   <div class="row">
+    <div class="seg" role="tablist" aria-label="模式切换">
+      <button id="modeA" class="active" type="button">模块总览</button>
+      <button id="modeB" type="button">临床结构</button>
+    </div>
     <button class="btn ghost" id="aboutBtn">说明</button>
   </div>
 </header>
@@ -81,7 +104,7 @@
         <div class="dTitle" id="dTitle">选择一个模块</div>
         <div class="dMeta" id="dMeta"></div>
       </div>
-      <div class="dBtns">
+      <div class="dBtns" id="topBtns">
         <button class="btn" id="copyRecord">复制护理记录</button>
         <button class="btn" id="copySBAR">复制SBAR</button>
         <button class="btn" id="copyEdu">复制宣教</button>
@@ -89,33 +112,108 @@
       </div>
     </div>
 
-    <div class="kv">
-      <div class="k">机制/原因</div><div class="v" id="dMechanism"></div>
-      <div class="k">危险信号</div><div class="v" id="dRed"></div>
-      <div class="k">评估要点（最少字段）</div><div class="v" id="dAssess"></div>
-      <div class="k">护理措施（可执行）</div><div class="v" id="dAction"></div>
-      <div class="k">复评时间</div><div class="v" id="dRe"></div>
-      <div class="k">效果评价</div><div class="v" id="dEval"></div>
+    <!-- Mode A: original full detail -->
+    <div id="modeAView">
+      <div class="kv">
+        <div class="k">机制/原因</div><div class="v" id="dMechanism"></div>
+
+        <div class="k">危险信号</div>
+        <div class="v vbox"><div class="copyMini"><button class="btn small ghost" id="copyRed">复制</button></div><div id="dRed"></div></div>
+
+        <div class="k">评估要点（最少字段）</div>
+        <div class="v vbox"><div class="copyMini"><button class="btn small ghost" id="copyAssess">复制</button></div><div id="dAssess"></div></div>
+
+        <div class="k">护理措施（可执行）</div>
+        <div class="v vbox"><div class="copyMini"><button class="btn small ghost" id="copyAction">复制</button></div><div id="dAction"></div></div>
+
+        <div class="k">复评时间</div>
+        <div class="v vbox"><div class="copyMini"><button class="btn small ghost" id="copyRe">复制</button></div><div id="dRe"></div></div>
+
+        <div class="k">效果评价</div><div class="v" id="dEval"></div>
+      </div>
+
+      <div class="block">
+        <div class="bHead">
+          <div class="bTitle">护理记录模板（可复制）</div>
+          <button class="btn small ghost" id="copyRecord2">复制该模板</button>
+        </div>
+        <pre id="dRecord"></pre>
+        <div class="hint">提示：如果你只想要“措施”，请用上面「护理措施（可执行）」右侧的复制按钮。</div>
+      </div>
+
+      <div class="block">
+        <div class="bHead">
+          <div class="bTitle">SBAR模板（可复制）</div>
+          <button class="btn small ghost" id="copySBAR2">复制该模板</button>
+        </div>
+        <pre id="dSBAR"></pre>
+      </div>
+
+      <div class="block">
+        <div class="bHead">
+          <div class="bTitle">宣教话术（可复制）</div>
+          <button class="btn small ghost" id="copyEdu2">复制该话术</button>
+        </div>
+        <pre id="dEdu"></pre>
+      </div>
+
+      <div class="block">
+        <div class="bTitle">参考依据</div>
+        <div class="v" id="dRefs"></div>
+      </div>
     </div>
 
-    <div class="block">
-      <div class="bTitle">护理记录模板（可复制）</div>
-      <pre id="dRecord"></pre>
-    </div>
+    <!-- Mode B: clinical flow -->
+    <div id="modeBView" style="display:none">
+      <div class="flow">
+        <div class="flowItem">
+          <div class="flowHead">
+            <div class="flowTitle">① 主诉模板</div>
+            <button class="btn small ghost" id="copyChief">复制主诉</button>
+          </div>
+          <div class="flowBody" id="dChief"></div>
+        </div>
 
-    <div class="block">
-      <div class="bTitle">SBAR模板（可复制）</div>
-      <pre id="dSBAR"></pre>
-    </div>
+        <div class="flowItem">
+          <div class="flowHead">
+            <div class="flowTitle">② 评估模板</div>
+            <button class="btn small ghost" id="copyAssess2">复制评估</button>
+          </div>
+          <div class="flowBody" id="dAssess2"></div>
+        </div>
 
-    <div class="block">
-      <div class="bTitle">宣教话术（可复制）</div>
-      <pre id="dEdu"></pre>
-    </div>
+        <div class="flowItem">
+          <div class="flowHead">
+            <div class="flowTitle">③ 护理措施模板</div>
+            <button class="btn small ghost" id="copyAction2">复制措施</button>
+          </div>
+          <div class="flowBody" id="dAction2"></div>
+        </div>
 
-    <div class="block">
-      <div class="bTitle">参考依据</div>
-      <div class="v" id="dRefs"></div>
+        <div class="flowItem">
+          <div class="flowHead">
+            <div class="flowTitle">④ 复评模板</div>
+            <button class="btn small ghost" id="copyRe2">复制复评</button>
+          </div>
+          <div class="flowBody" id="dRe2"></div>
+        </div>
+
+        <div class="flowItem">
+          <div class="flowHead">
+            <div class="flowTitle">⑤ 效果评价模板</div>
+            <button class="btn small ghost" id="copyEval2">复制评价</button>
+          </div>
+          <div class="flowBody" id="dEval2"></div>
+        </div>
+
+        <div class="flowItem">
+          <div class="flowHead">
+            <div class="flowTitle">⑥ 一键完整护理记录</div>
+            <button class="btn" id="copyFullFlow">复制完整记录</button>
+          </div>
+          <div class="hint">把 ①~⑤ 依次拼接成完整记录（更符合你科室书写习惯）。</div>
+        </div>
+      </div>
     </div>
 
     <div class="toast" id="toast"></div>
@@ -123,10 +221,14 @@
 </main>
 
 <dialog id="about">
-  <h3>为什么你刚才复制出来只有一行？</h3>
-  <p>因为 v1 的数据里“护理记录模板/SBAR/宣教话术”大多是占位符（例如【按结构】…），所以复制只能得到那一行。</p>
-  <p><strong>v2 已补全：</strong>把通用高频模块的模板写完整，并给其余模块生成可直接用的通用模板。</p>
-  <p><strong>减负原则：</strong>不做一堆必填表单；只给你“最少字段 + 一键复制”，你粘贴后把“××”替换成真实信息即可。</p>
+  <h3>你刚才说“怎么都变了、其他内容都没了”</h3>
+  <p>你看到的那个版本只有3个模块，是我做的<strong>测试版 v3.2</strong>（为了验证分段复制逻辑）。</p>
+  <p><strong>现在这个 v3.3：</strong></p>
+  <ul>
+    <li>保留原来“模块总览”的所有内容（机制/危险信号/评估/措施/复评/模板/SBAR/宣教/依据）。</li>
+    <li>新增“临床结构”模式：主诉/评估/措施/复评/评价分段复制。</li>
+    <li>你只想复制“护理措施”，请点「护理措施（可执行）」右侧的复制。</li>
+  </ul>
   <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px;">
     <button class="btn ghost" onclick="document.getElementById('about').close()">关闭</button>
   </div>
@@ -139,6 +241,7 @@ window.MODULES=[{"模块名称": "疼痛（NRS）", "分类": "生命体征/症�
 <script>
 const DATA = window.MODULES || [];
 let current = null;
+let mode = 'A'; // A=module, B=flow
 
 const el = (id)=>document.getElementById(id);
 const toast = (msg)=>{
@@ -149,51 +252,42 @@ const toast = (msg)=>{
   window.__toastTimer = setTimeout(()=>t.style.display='none', 1600);
 };
 const norm = (s)=>(s||'').toString().trim().toLowerCase();
-const getField = (r, k)=> r[k] ?? r[k.replace(/\s+/g,'')] ?? '';
-const esc = (s)=>(s??'').toString().replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
-
+const getField = (r, k)=> r?.[k] ?? '';
 function buildCats(){
   const cats = Array.from(new Set(DATA.map(r=>getField(r,'分类')).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'zh'));
   const sel = el('cat');
-  cats.forEach(c=>{
-    const o = document.createElement('option');
-    o.value=c; o.textContent=c; sel.appendChild(o);
-  });
+  cats.forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; sel.appendChild(o); });
   const chips = el('chips');
   cats.slice(0,10).forEach(c=>{
-    const b = document.createElement('button');
+    const b=document.createElement('button');
     b.className='chip'; b.textContent=c;
     b.onclick=()=>{sel.value=c; render();};
     chips.appendChild(b);
   });
 }
-
 function matchRow(r,q,cat){
-  const fields = ['模块名称','分类','机制','危险信号','评估要点','护理措施','复评时间','效果评价','护理记录模板','SBAR模板','宣教话术','参考依据'];
+  const fields=['模块名称','分类','机制','危险信号','评估要点','护理措施','复评时间','效果评价','护理记录模板','SBAR模板','宣教话术','参考依据'];
   const hay = fields.map(f=>getField(r,f)).join(' ');
   return (!q || norm(hay).includes(norm(q))) && (!cat || getField(r,'分类')===cat);
 }
-
 function render(){
-  const q = el('q').value;
-  const cat = el('cat').value;
-  const sort = el('sort').value;
+  const q=el('q').value;
+  const cat=el('cat').value;
+  const sort=el('sort').value;
   let rows = DATA.filter(r=>matchRow(r,q,cat));
   const key = sort==='cat' ? '分类' : '模块名称';
   rows.sort((a,b)=> norm(getField(a,key)).localeCompare(norm(getField(b,key)), 'zh'));
-
-  const grid = el('grid');
-  grid.innerHTML='';
+  const grid=el('grid'); grid.innerHTML='';
   rows.forEach(r=>{
-    const div = document.createElement('div');
+    const div=document.createElement('div');
     div.className='card';
     const name=getField(r,'模块名称');
     const meta=getField(r,'分类');
-    const snippet=(getField(r,'护理记录模板')||getField(r,'危险信号')||'').toString();
+    const snippet=(getField(r,'护理记录模板')||getField(r,'护理措施')||'').toString();
     div.innerHTML = `
-      <div class="cardTitle">${esc(name)}</div>
-      <div class="cardMeta">${esc(meta)}</div>
-      <div class="cardSnippet">${esc(snippet).slice(0,160)}${snippet.length>160?'…':''}</div>
+      <div class="cardTitle">${name}</div>
+      <div class="cardMeta">${meta}</div>
+      <div class="cardSnippet">${snippet.slice(0,160)}${snippet.length>160?'…':''}</div>
       <div class="badge">点击查看/复制</div>
     `;
     div.onclick=()=>select(r);
@@ -203,10 +297,17 @@ function render(){
   if(!rows.length) clearDetail();
 }
 
+function makeChiefTemplate(r){
+  const name=getField(r,'模块名称');
+  return `主诉/情况：患者诉${name}相关不适；生命体征 T××℃ P××次/分 R××次/分 BP××mmHg；SpO₂××%（必要时）；意识××。`;
+}
+
 function select(r){
   current=r;
   el('dTitle').textContent=getField(r,'模块名称');
   el('dMeta').textContent=getField(r,'分类');
+
+  // mode A fields
   el('dMechanism').textContent=getField(r,'机制');
   el('dRed').textContent=getField(r,'危险信号');
   el('dAssess').textContent=getField(r,'评估要点');
@@ -217,12 +318,19 @@ function select(r){
   el('dSBAR').textContent=getField(r,'SBAR模板');
   el('dEdu').textContent=getField(r,'宣教话术');
   el('dRefs').textContent=getField(r,'参考依据');
+
+  // mode B flow blocks
+  el('dChief').textContent = makeChiefTemplate(r);
+  el('dAssess2').textContent = `评估：${getField(r,'评估要点')}`;
+  el('dAction2').textContent = `处理/措施：${getField(r,'护理措施')}`;
+  el('dRe2').textContent = `复评：${getField(r,'复评时间')}`;
+  el('dEval2').textContent = `效果评价：${getField(r,'效果评价')}`;
 }
 
 function clearDetail(){
   el('dTitle').textContent='没有匹配结果';
   el('dMeta').textContent='';
-  ['dMechanism','dRed','dAssess','dAction','dRe','dEval','dRecord','dSBAR','dEdu','dRefs'].forEach(id=>el(id).textContent='');
+  ['dMechanism','dRed','dAssess','dAction','dRe','dEval','dRecord','dSBAR','dEdu','dRefs','dChief','dAssess2','dAction2','dRe2','dEval2'].forEach(id=>el(id).textContent='');
 }
 
 async function copyText(txt){
@@ -236,15 +344,42 @@ async function copyText(txt){
     toast('已复制 ✅');
   }
 }
+function copyField(field){ if(!current) return; copyText(getField(current, field)); }
 
-el('copyRecord').onclick=()=>current && copyText(getField(current,'护理记录模板'));
-el('copySBAR').onclick=()=>current && copyText(getField(current,'SBAR模板'));
-el('copyEdu').onclick=()=>current && copyText(getField(current,'宣教话术'));
+el('copyRecord').onclick=()=>copyField('护理记录模板');
+el('copyRecord2').onclick=()=>copyField('护理记录模板');
+el('copySBAR').onclick=()=>copyField('SBAR模板');
+el('copySBAR2').onclick=()=>copyField('SBAR模板');
+el('copyEdu').onclick=()=>copyField('宣教话术');
+el('copyEdu2').onclick=()=>copyField('宣教话术');
+
+// single field copy in mode A
+el('copyAssess').onclick=()=>copyField('评估要点');
+el('copyAction').onclick=()=>copyField('护理措施');  // ✅ only measures
+el('copyRe').onclick=()=>copyField('复评时间');
+el('copyRed').onclick=()=>copyField('危险信号');
+
+// flow copy
+el('copyChief').onclick=()=>{ if(!current) return; copyText(el('dChief').textContent); };
+el('copyAssess2').onclick=()=>{ if(!current) return; copyText(el('dAssess2').textContent); };
+el('copyAction2').onclick=()=>{ if(!current) return; copyText(el('dAction2').textContent); };
+el('copyRe2').onclick=()=>{ if(!current) return; copyText(el('dRe2').textContent); };
+el('copyEval2').onclick=()=>{ if(!current) return; copyText(el('dEval2').textContent); };
+el('copyFullFlow').onclick=()=>{
+  if(!current) return;
+  const full = [el('dChief').textContent, el('dAssess2').textContent, el('dAction2').textContent, el('dRe2').textContent, el('dEval2').textContent].join('\n');
+  copyText(full);
+};
+
 el('copyAll').onclick=()=>{
   if(!current) return;
   const all = [
     `【模块】${getField(current,'模块名称')}（${getField(current,'分类')}）`,
     `\n【危险信号】\n${getField(current,'危险信号')}`,
+    `\n【评估要点】\n${getField(current,'评估要点')}`,
+    `\n【护理措施】\n${getField(current,'护理措施')}`,
+    `\n【复评时间】\n${getField(current,'复评时间')}`,
+    `\n【效果评价】\n${getField(current,'效果评价')}`,
     `\n【护理记录模板】\n${getField(current,'护理记录模板')}`,
     `\n【SBAR模板】\n${getField(current,'SBAR模板')}`,
     `\n【宣教话术】\n${getField(current,'宣教话术')}`,
@@ -252,6 +387,16 @@ el('copyAll').onclick=()=>{
   ].join('\n');
   copyText(all);
 };
+
+function setMode(m){
+  mode=m;
+  el('modeA').classList.toggle('active', m==='A');
+  el('modeB').classList.toggle('active', m==='B');
+  el('modeAView').style.display = m==='A' ? '' : 'none';
+  el('modeBView').style.display = m==='B' ? '' : 'none';
+}
+el('modeA').onclick=()=>setMode('A');
+el('modeB').onclick=()=>setMode('B');
 
 el('aboutBtn').onclick=()=>el('about').showModal();
 el('q').addEventListener('input', render);
